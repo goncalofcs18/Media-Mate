@@ -1,0 +1,234 @@
+/* Set the background color */
+
+.app {
+    height: 100vh;
+    width: 100vw;
+    background-color: #ece7dd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+
+/* ------------------ main button ------------------------- */
+
+.image-button {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.image-button img {
+    width: 100px;
+    /* Adjust the size of the image */
+    height: 100px;
+    border-radius: 50px;
+    /* Optional: Makes the button circular */
+    box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px;
+}
+
+
+/* ------------------------- Popup ----------------------- */
+
+
+/* Popup */
+
+.popup {
+    position: absolute;
+    bottom: 150px;
+    width: 80%;
+    /* Adjusted width */
+    /* Reduced width */
+    height: 45%;
+    /* Reduced height */
+    background-color: #ece7dd;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px;
+    padding: 20px;
+    text-align: center;
+    z-index: 10;
+    /* Keep popup above other elements */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 80px;
+}
+
+.popup h3 {
+    margin: 0;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.popup ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 18px;
+}
+
+.popup ul li {
+    margin: 10px 0;
+}
+
+.close-button {
+    margin-top: 20px;
+    background-color: #ff5f5f;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.close-button:hover {
+    background-color: #945f5f;
+}
+
+
+/* ---------------------- logo ----------------- */
+
+.image-container {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+
+/* Metallic image styling */
+
+
+/* Hover effect with reusable animation */
+
+.image-container:hover .metallic-image {
+    animation: cool-spin 1.5s ease-in-out;
+    /* Trigger animation on hover */
+}
+
+
+/* Keyframes for a "cooler" spin effect */
+
+@keyframes cool-spin {
+    0% {
+        transform: scale(1) rotateY(0deg);
+        /* Start at normal size */
+        opacity: 1;
+        /* Fully visible */
+    }
+    25% {
+        transform: scale(1.2) rotateY(30deg);
+        /* Zoom and halfway spin */
+        opacity: 0.8;
+        /* Slight fade */
+    }
+    50% {
+        transform: scale(1) rotateX(30deg);
+        /* Tilt on X-axis */
+        opacity: 1;
+        /* Fully visible */
+    }
+    75% {
+        transform: scale(0.8) rotateZ(-30deg);
+        /* Reverse zoom */
+        opacity: 0.8;
+        /* Slight fade */
+    }
+    100% {
+        transform: scale(1) rotate(360deg);
+        /* Back to normal position */
+        opacity: 1;
+        /* Fully visible */
+    }
+}
+
+
+/* ---------------------- popup buttons --------------- */
+
+
+/* Grid container for buttons */
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* Two columns */
+    grid-gap: 10px;
+    /* Spacing between buttons */
+    width: 100%;
+    /* Full width of popup */
+    margin: 20px 0;
+}
+
+
+/* Option button styles */
+
+.option-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background-color: #fff;
+    /* White background */
+    color: #000;
+    /* Black text */
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px;
+}
+
+.option-button img {
+    width: 40px;
+    /* Icon size */
+    height: 40px;
+}
+
+.option-button:hover {
+    transform: scale(1.05);
+    /* Slight zoom on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Close button */
+
+.close-button {
+    margin-top: 10px;
+    background-color: #434c96;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.close-button:hover {
+    transform: scale(1.05);
+    /* Slight zoom on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+@font-face {
+    font-family: 'Kare';
+    src: url('assets/fonts/Kare.ttf') format('truetype');
+    /* Adjust the format if it's OTF or WOFF */
+    font-weight: normal;
+    font-style: normal;
+}
