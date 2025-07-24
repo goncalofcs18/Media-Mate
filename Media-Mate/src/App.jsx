@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import SearchableInput from './components/SearchableInput';
 
@@ -7,14 +7,35 @@ function App() {
   const [title, setTitle] = useState(''); // Store the current input value
   const [items, setItems] = useState([]); // Store the list of all items (TV Shows, Movies, etc.)
 
-  const handleConfirm = (type) => {
-    if (title.trim() !== '') {
-      // Add new item with title and type
-      setItems([...items, { title, type, id: Date.now() }]);
-      setTitle(''); // Clear input
-      setCurrentPopup(null); // Close popup
-    } 
-  };
+  // Load saved items from localStorage on component mount
+  useEffect(() => {
+    const savedItems = localStorage.getItem('mediaMateItems');
+    if (savedItems) {
+      try {
+        const parsedItems = JSON.parse(savedItems);
+        // Check if the data structure is valid
+        if (Array.isArray(parsedItems) && parsedItems.every(item => item.title && item.type)) {
+          setItems(parsedItems);
+          console.log('Loaded', parsedItems.length, 'saved items from storage');
+        } else {
+          // Clear invalid data
+          localStorage.removeItem('mediaMateItems');
+          console.log('Cleared invalid localStorage data');
+        }
+      } catch (error) {
+        console.error('Error loading saved items:', error);
+        localStorage.removeItem('mediaMateItems');
+      }
+    }
+  }, []);
+
+  // Save items to localStorage whenever items array changes
+  useEffect(() => {
+    if (items.length > 0) {
+      localStorage.setItem('mediaMateItems', JSON.stringify(items));
+      console.log('Saved', items.length, 'items to storage');
+    }
+  }, [items]);
 
   const handleApiItemSelect = (selectedItem) => {
     // Add API-selected item with rich metadata
@@ -25,13 +46,25 @@ function App() {
       year: selectedItem.year,
       poster: selectedItem.poster,
       rating: selectedItem.rating,
-      overview: selectedItem.overview,
-      tmdbId: selectedItem.id
+      overview: selectedItem.overview || selectedItem.description,
+      tmdbId: selectedItem.tmdbId || null,
+      // Book-specific fields
+      authors: selectedItem.authors || null,
+      pageCount: selectedItem.pageCount || null,
+      publisher: selectedItem.publisher || null,
+      categories: selectedItem.categories || null
     };
     
     setItems([...items, newItem]);
     setTitle(''); // Clear input
     setCurrentPopup(null); // Close popup
+  };
+
+  // Function to clear all data (optional - for testing)
+  const clearAllData = () => {
+    setItems([]);
+    localStorage.removeItem('mediaMateItems');
+    console.log('All data cleared');
   };
 
   return (
@@ -42,89 +75,94 @@ function App() {
           src="assets/logo.png"
           alt="Metallic Icon"
           className="metallic-image"
-          style={{ width: '220px', height: 'auto' }}
         />
       </div>
 
       {/* CONTAINER TO DISPLAY ITEMS */}
-      <div
-        style={{
-          marginTop: '10px',
-          width: '82%',
-          maxHeight: '430px',
-          overflowY: 'auto', // Make it scrollable when there are many items
-          backgroundColor: '#ece7dd',
-          border: '1px solid #ccc',
-          borderRadius: '25px',
-          padding: '14px',
-        }}
-      >
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {items.map((item, index) => (
-            <li
-              key={item.id || index}
+      {items.length > 0 && (
+        <div className="main-container">
+          <div style={{ 
+            textAlign: 'center', 
+            marginBottom: '4px',
+            padding: '4px'
+          }}>
+            <button 
+              onClick={clearAllData}
               style={{
-                fontSize: '17px',
-                margin: '10px 0',
-                backgroundColor: item.type === 'TV Show' ? '#f8c04b' : item.type === 'Movie' ? '#dd0526' : '#8f337e', // Different colors for types
-                padding: '10px',
-                borderRadius: '15px',
-                color: item.type === 'TV Show' ? '#434c96' : '#ffffff',
-                boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
+                padding: '4px 8px',
+                backgroundColor: '#ff4757',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '10px',
+                cursor: 'pointer'
               }}
             >
-              {/* Show poster if available, otherwise show icon */}
-              {item.poster ? (
-                <img
-                  src={item.poster}
-                  style={{
-                    width: '40px',
-                    height: '60px',
-                    objectFit: 'cover',
-                    borderRadius: '4px',
-                  }}
-                  alt={item.title}
-                />
-              ) : (
-                <img
-                  src={
-                    item.type === 'TV Show'
-                      ? '/assets/tv2.png'
-                      : item.type === 'Movie'
-                      ? '/assets/movie.png'
-                      : '/assets/microphone.png'
-                  }
-                  style={{
-                    objectFit: 'contain',
-                    width: '20px',
-                    height: '20px',
-                  }}
-                  alt={item.type}
-                />
-              )}
-              
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 'bold', lineHeight: '20px' }}>
-                  {item.title}
-                  {item.year && ` (${item.year})`}
-                </div>
-                {item.rating && (
-                  <div style={{ 
-                    fontSize: '14px', 
-                    opacity: 0.8,
-                    marginTop: '2px'
-                  }}>
-                    ⭐ {item.rating.toFixed(1)}
-                  </div>
+              Clear All Data
+            </button>
+          </div>
+          <ul>
+            {items.map((item, index) => (
+              <li
+                key={item.id || index}
+                style={{
+                  backgroundColor: item.type === 'TV Show' ? '#f8c04b' : item.type === 'Movie' ? '#dd0526' : item.type === 'Book' ? '#ed712f' : '#8f337e',
+                  color: item.type === 'TV Show' ? '#434c96' : '#ffffff',
+                }}
+              >
+                {/* Show poster if available, otherwise show icon */}
+                {item.poster ? (
+                  <img
+                    src={item.poster}
+                    className="item-poster"
+                    alt={item.title}
+                  />
+                ) : (
+                  <img
+                    src={
+                      item.type === 'TV Show'
+                        ? '/assets/tv2.png'
+                        : item.type === 'Movie'
+                        ? '/assets/movie.png'
+                        : item.type === 'Book'
+                        ? '/assets/book.png'
+                        : '/assets/microphone.png'
+                    }
+                    className="item-icon"
+                    alt={item.type}
+                  />
                 )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+                
+                <div className="item-content">
+                  <div className="item-title">
+                    {item.title}
+                    {item.type === 'Book' && item.authors && item.authors.length > 0 && 
+                      ` by ${item.authors[0]}${item.authors.length > 1 ? ' et al.' : ''}`
+                    }
+                    {item.year && ` (${item.year})`}
+                  </div>
+                  {item.rating && (
+                    <div className="item-rating">
+                      {item.type === 'Book' ? `📚 ${item.rating.toFixed(1)}/5` : `⭐ ${item.rating.toFixed(1)}`}
+                    </div>
+                  )}
+                  {item.type === 'Book' && item.pageCount && (
+                    <div style={{ 
+                      fontSize: 'clamp(11px, 2.5vw, 13px)', 
+                      color: item.type === 'TV Show' ? '#434c96' : '#fff',
+                      opacity: 0.8,
+                      marginTop: '1px',
+                      lineHeight: 1
+                    }}>
+                      📄 {item.pageCount} pages
+                    </div>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* MAIN BUTTON */}
       <button className="image-button" onClick={() => setCurrentPopup('main')}>
@@ -137,8 +175,8 @@ function App() {
           <h3
             className="options-tag"
             style={{
-              fontSize: '35px',
-              marginBottom: '5px',
+              fontSize: 'clamp(32px, 7vw, 44px)',
+              marginBottom: '15px',
               fontFamily: 'Kare, sans-serif',
               color: '#434c96',
             }}
@@ -212,7 +250,7 @@ function App() {
             boxSizing: 'border-box'
           }}>
             {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
               <h3 style={{
                 fontSize: 'clamp(40px, 9vw, 52px)',
                 fontFamily: 'Kare, sans-serif',
@@ -225,51 +263,28 @@ function App() {
             </div>
             
             {/* Form Content */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '25px' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '15px' }}>
               <label style={{
                 display: 'block',
                 fontFamily: 'Kare, sans-serif',
                 color: '#434c96',
                 fontSize: 'clamp(26px, 6vw, 32px)',
-                marginBottom: '8px',
+                marginBottom: '12px',
                 textAlign: 'left'
               }}>
                 Title:
               </label>
               
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '14px',
-                position: 'relative',
-                zIndex: 1
-              }}>
-                <SearchableInput
-                  type="TV Show"
-                  value={title}
-                  onChange={setTitle}
-                  onSelect={handleApiItemSelect}
-                />
-                <button
-                  style={{
-                    padding: '16px 28px',
-                    backgroundColor: '#434c96',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    fontSize: '20px',
-                    fontWeight: '500',
-                  }}
-                  onClick={() => handleConfirm('TV Show')}
-                >
-                  Add Manually
-                </button>
-              </div>
+              <SearchableInput
+                type="TV Show"
+                value={title}
+                onChange={setTitle}
+                onSelect={handleApiItemSelect}
+              />
             </div>
             
             {/* Footer */}
-            <div style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '15px' }}>
+            <div style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '20px' }}>
               <button className="close-button" onClick={() => setCurrentPopup('main')}>
                 Back
               </button>
@@ -289,7 +304,7 @@ function App() {
             boxSizing: 'border-box'
           }}>
             {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
               <h3 style={{
                 fontSize: 'clamp(40px, 9vw, 52px)',
                 fontFamily: 'Kare, sans-serif',
@@ -302,51 +317,82 @@ function App() {
             </div>
             
             {/* Form Content */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '25px' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '15px' }}>
               <label style={{
                 display: 'block',
                 fontFamily: 'Kare, sans-serif',
                 color: '#434c96',
                 fontSize: 'clamp(26px, 6vw, 32px)',
-                marginBottom: '8px',
+                marginBottom: '12px',
                 textAlign: 'left'
               }}>
                 Title:
               </label>
               
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '14px',
-                position: 'relative',
-                zIndex: 1
-              }}>
-                <SearchableInput
-                  type="Movie"
-                  value={title}
-                  onChange={setTitle}
-                  onSelect={handleApiItemSelect}
-                />
-                <button
-                  style={{
-                    padding: '16px 28px',
-                    backgroundColor: '#434c96',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    fontSize: '20px',
-                    fontWeight: '500',
-                  }}
-                  onClick={() => handleConfirm('Movie')}
-                >
-                  Add Manually
-                </button>
-              </div>
+              <SearchableInput
+                type="Movie"
+                value={title}
+                onChange={setTitle}
+                onSelect={handleApiItemSelect}
+              />
             </div>
             
             {/* Footer */}
-            <div style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '15px' }}>
+            <div style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '20px' }}>
+              <button className="close-button" onClick={() => setCurrentPopup('main')}>
+                Back
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BOOK POPUP */}
+      {currentPopup === 'book' && (
+        <div className="popup">
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            padding: '16px',
+            boxSizing: 'border-box'
+          }}>
+            {/* Header */}
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+              <h3 style={{
+                fontSize: 'clamp(40px, 9vw, 52px)',
+                fontFamily: 'Kare, sans-serif',
+                color: '#ed712f',
+                margin: '0',
+                lineHeight: '1.1'
+              }}>
+                Book
+              </h3>
+            </div>
+            
+            {/* Form Content */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '15px' }}>
+              <label style={{
+                display: 'block',
+                fontFamily: 'Kare, sans-serif',
+                color: '#434c96',
+                fontSize: 'clamp(26px, 6vw, 32px)',
+                marginBottom: '12px',
+                textAlign: 'left'
+              }}>
+                Title:
+              </label>
+              
+              <SearchableInput
+                type="Book"
+                value={title}
+                onChange={setTitle}
+                onSelect={handleApiItemSelect}
+              />
+            </div>
+            
+            {/* Footer */}
+            <div style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '20px' }}>
               <button className="close-button" onClick={() => setCurrentPopup('main')}>
                 Back
               </button>

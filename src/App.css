@@ -1,4 +1,4 @@
-/* Set the background color - UPDATED VERSION */
+/* Set the background color */
 
 .app {
     height: 100vh;
@@ -11,22 +11,24 @@
     overflow: hidden; /* Prevent scrolling on main app */
 }
 
-/* Main container responsive styling - CENTERED */
+/* Main container responsive styling */
 .main-container {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    width: min(90vw, 400px);
-    max-height: min(60vh, 400px);
+    transform: translate(-50%, -50%); /* Exact same as popup */
+    width: min(90vw, 400px); /* Same width as popup */
+    max-height: min(60vh, 400px); /* Same max height as popup */
     background-color: #ece7dd;
     border: 1px solid #ccc;
-    border-radius: 25px;
-    padding: clamp(15px, 4vw, 25px);
+    border-radius: 25px; /* Same as popup */
+    padding: clamp(15px, 4vw, 25px); /* Same as popup */
     overflow-y: auto;
     box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px;
-    z-index: 10;
+    z-index: 10; /* Lower z-index than popup */
     box-sizing: border-box;
+    /* Temporary debug - remove this later */
+    border: 3px solid red !important;
 }
 
 .main-container ul {
@@ -125,7 +127,7 @@
     box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px;
     padding: clamp(15px, 4vw, 25px);
     text-align: center;
-    z-index: 100; /* Higher than main-container */
+    z-index: 100;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -277,8 +279,9 @@
 }
 
 .option-button:hover {
-    transform: scale(1.02); /* More subtle scaling */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* Gentler shadow */
+    transform: scale(1.05);
+    /* Slight zoom on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -307,4 +310,4 @@
     /* Adjust the format if it's OTF or WOFF */
     font-weight: normal;
     font-style: normal;
-}
+} 
