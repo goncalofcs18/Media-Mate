@@ -52,7 +52,12 @@ function App() {
       authors: selectedItem.authors || null,
       pageCount: selectedItem.pageCount || null,
       publisher: selectedItem.publisher || null,
-      categories: selectedItem.categories || null
+      categories: selectedItem.categories || null,
+      // Music-specific fields
+      artist: selectedItem.artist || null,
+      album: selectedItem.album || null,
+      listeners: selectedItem.listeners || null,
+      url: selectedItem.url || null
     };
     
     setItems([...items, newItem]);
@@ -106,7 +111,11 @@ function App() {
               <li
                 key={item.id || index}
                 style={{
-                  backgroundColor: item.type === 'TV Show' ? '#f8c04b' : item.type === 'Movie' ? '#dd0526' : item.type === 'Book' ? '#ed712f' : '#8f337e',
+                  backgroundColor: item.type === 'TV Show' ? '#f8c04b' 
+                    : item.type === 'Movie' ? '#dd0526' 
+                    : item.type === 'Book' ? '#ed712f' 
+                    : item.type === 'Favorite Song' ? '#27a470'
+                    : '#8f337e',
                   color: item.type === 'TV Show' ? '#434c96' : '#ffffff',
                 }}
               >
@@ -114,7 +123,7 @@ function App() {
                 {item.poster ? (
                   <img
                     src={item.poster}
-                    className="item-poster"
+                    className={item.type === 'Favorite Song' ? 'item-poster-square' : 'item-poster'}
                     alt={item.title}
                   />
                 ) : (
@@ -126,6 +135,8 @@ function App() {
                         ? '/assets/movie.png'
                         : item.type === 'Book'
                         ? '/assets/book.png'
+                        : item.type === 'Favorite Song'
+                        ? '/assets/music.png'
                         : '/assets/microphone.png'
                     }
                     className="item-icon"
@@ -138,6 +149,9 @@ function App() {
                     {item.title}
                     {item.type === 'Book' && item.authors && item.authors.length > 0 && 
                       ` by ${item.authors[0]}${item.authors.length > 1 ? ' et al.' : ''}`
+                    }
+                    {item.type === 'Favorite Song' && item.artist && 
+                      ` by ${item.artist}`
                     }
                     {item.year && ` (${item.year})`}
                   </div>
@@ -155,6 +169,17 @@ function App() {
                       lineHeight: 1
                     }}>
                       📄 {item.pageCount} pages
+                    </div>
+                  )}
+                  {item.type === 'Favorite Song' && item.album && (
+                    <div style={{ 
+                      fontSize: 'clamp(11px, 2.5vw, 13px)', 
+                      color: item.type === 'TV Show' ? '#434c96' : '#fff',
+                      opacity: 0.8,
+                      marginTop: '1px',
+                      lineHeight: 1
+                    }}>
+                      💿 {item.album}
                     </div>
                   )}
                 </div>
@@ -214,7 +239,7 @@ function App() {
               onClick={() => setCurrentPopup('favoriteSong')}
             >
               <img src="assets/music.png" alt="Music" />
-              Favorite Song
+              Song
             </button>
             <button
               className="option-button"
@@ -385,6 +410,60 @@ function App() {
               
               <SearchableInput
                 type="Book"
+                value={title}
+                onChange={setTitle}
+                onSelect={handleApiItemSelect}
+              />
+            </div>
+            
+            {/* Footer */}
+            <div style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '20px' }}>
+              <button className="close-button" onClick={() => setCurrentPopup('main')}>
+                Back
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FAVORITE SONG POPUP */}
+      {currentPopup === 'favoriteSong' && (
+        <div className="popup">
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            padding: '16px',
+            boxSizing: 'border-box'
+          }}>
+            {/* Header */}
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+              <h3 style={{
+                fontSize: 'clamp(40px, 9vw, 52px)',
+                fontFamily: 'Kare, sans-serif',
+                color: '#27a470',
+                margin: '0',
+                lineHeight: '1.1'
+              }}>
+                Song
+              </h3>
+            </div>
+            
+            {/* Form Content */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '15px' }}>
+              <label style={{
+                display: 'block',
+                fontFamily: 'Kare, sans-serif',
+                color: '#434c96',
+                fontSize: 'clamp(26px, 6vw, 32px)',
+                marginBottom: '12px',
+                textAlign: 'left'
+              }}>
+                Song Title:
+              </label>
+              
+              <SearchableInput
+                type="Favorite Song"
                 value={title}
                 onChange={setTitle}
                 onSelect={handleApiItemSelect}

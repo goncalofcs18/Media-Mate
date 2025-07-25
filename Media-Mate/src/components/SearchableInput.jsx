@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { searchMovies, searchTVShows } from '../utils/tmdbApi';
 import { searchBooks } from '../utils/googleBooksApi';
+import { searchTracks } from '../utils/lastfmApi';
 
 const SearchableInput = ({ type, onSelect, value, onChange }) => {
   const [suggestions, setSuggestions] = useState([]);
@@ -8,18 +9,20 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Make API calls for Movie, TV Show, and Book types
-    if (type === 'Movie' || type === 'TV Show' || type === 'Book') {
+    // Make API calls for Movie, TV Show, Book, and Favorite Song types
+    if (type === 'Movie' || type === 'TV Show' || type === 'Book' || type === 'Favorite Song') {
       let searchFunction;
-      
+
       if (type === 'Movie') {
         searchFunction = searchMovies;
       } else if (type === 'TV Show') {
         searchFunction = searchTVShows;
       } else if (type === 'Book') {
         searchFunction = searchBooks;
+      } else if (type === 'Favorite Song') {
+        searchFunction = searchTracks;
       }
-      
+
       // Debounce search to avoid too many API calls
       const timeoutId = setTimeout(async () => {
         if (value.trim().length > 2) {
@@ -41,7 +44,7 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
 
       return () => clearTimeout(timeoutId);
     } else {
-      // For other types (Music, Concert, etc.), just show the dropdown if there's text
+      // For other types (Concert, etc.), just show the dropdown if there's text
       if (value.trim().length > 2) {
         setSuggestions([]);
         setShowSuggestions(true);
@@ -50,6 +53,15 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
       }
     }
   }, [value, type]);
+
+  const handleInputChange = (e) => {
+    onChange(e.target.value);
+  };
+
+  const handleInputBlur = () => {
+    // Delay hiding suggestions to allow for clicks
+    setTimeout(() => setShowSuggestions(false), 200);
+  };
 
   const handleSuggestionClick = (suggestion) => {
     onSelect(suggestion);
@@ -67,20 +79,14 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
       poster: null,
       rating: null,
       overview: null,
-      tmdbId: null
+      tmdbId: null,
+      // Music-specific fields
+      artist: null,
+      album: null
     };
     onSelect(customItem);
     setShowSuggestions(false);
     setSuggestions([]);
-  };
-
-  const handleInputChange = (e) => {
-    onChange(e.target.value);
-  };
-
-  const handleInputBlur = () => {
-    // Delay hiding suggestions to allow click events to fire
-    setTimeout(() => setShowSuggestions(false), 200);
   };
 
   const formatBookDisplay = (book) => {
@@ -94,6 +100,15 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
     if (book.year) {
       displayText += ` (${book.year})`;
     }
+    return displayText;
+  };
+
+  const formatSongDisplay = (song) => {
+    let displayText = song.title;
+    if (song.artist) {
+      displayText += ` by ${song.artist}`;
+    }
+    // Remove album from main display - it will be shown in the smaller section
     return displayText;
   };
 
@@ -117,27 +132,6 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
           minHeight: '52px',
         }}
       />
-      
-      {loading && (
-        <div style={{
-          position: 'absolute',
-          top: '100%',
-          left: 0,
-          right: 0,
-          backgroundColor: '#ece7dd',
-          border: '1px solid #ccc',
-          borderRadius: '12px',
-          padding: 'clamp(12px, 3vw, 16px)',
-          marginTop: '4px',
-          textAlign: 'center',
-          zIndex: 1000,
-          fontSize: 'clamp(16px, 4vw, 18px)',
-          color: '#434c96',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-        }}>
-          Loading...
-        </div>
-      )}
 
       {showSuggestions && value.trim().length > 2 && (
         <div style={{
@@ -149,7 +143,7 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
           border: '1px solid #ccc',
           borderRadius: '12px',
           marginTop: '4px',
-          maxHeight: 'min(240px, 42vh)',
+          maxHeight: 'min(220px, 40vh)',
           overflowY: 'auto',
           zIndex: 1000,
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
@@ -174,7 +168,7 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
           >
             <div style={{
               width: 'clamp(36px, 7vw, 44px)',
-              height: 'clamp(54px, 10.5vw, 66px)',
+              height: type === 'Favorite Song' ? 'clamp(36px, 7vw, 44px)' : 'clamp(54px, 10.5vw, 66px)', // Square for songs
               backgroundColor: '#434c96',
               borderRadius: '4px',
               display: 'flex',
@@ -187,8 +181,8 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
               +
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ 
-                fontWeight: 'bold', 
+              <div style={{
+                fontWeight: 'bold',
                 color: '#434c96',
                 fontSize: 'clamp(15px, 3.5vw, 17px)',
                 lineHeight: 1.2,
@@ -196,10 +190,10 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap'
               }}>
-                Save "{value.trim()}" as {type}
+                Save "{value.trim()}" as {type === 'Favorite Song' ? 'Song' : type}
               </div>
-              <div style={{ 
-                fontSize: 'clamp(13px, 3vw, 15px)', 
+              <div style={{
+                fontSize: 'clamp(13px, 3vw, 15px)',
                 color: '#666',
                 marginTop: '3px',
                 lineHeight: 1
@@ -210,7 +204,7 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
           </div>
 
           {/* API suggestions */}
-          {(type === 'Movie' || type === 'TV Show' || type === 'Book') && suggestions.map((suggestion, index) => (
+          {(type === 'Movie' || type === 'TV Show' || type === 'Book' || type === 'Favorite Song') && suggestions.map((suggestion, index) => (
             <div
               key={suggestion.id}
               onClick={() => handleSuggestionClick(suggestion)}
@@ -235,7 +229,7 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
                   alt={suggestion.title}
                   style={{
                     width: 'clamp(36px, 7vw, 44px)',
-                    height: 'clamp(54px, 10.5vw, 66px)',
+                    height: type === 'Favorite Song' ? 'clamp(36px, 7vw, 44px)' : 'clamp(54px, 10.5vw, 66px)', // Square for songs
                     objectFit: 'cover',
                     borderRadius: '4px',
                     flexShrink: 0,
@@ -243,8 +237,8 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
                 />
               )}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ 
-                  fontWeight: 'bold', 
+                <div style={{
+                  fontWeight: 'bold',
                   color: '#434c96',
                   fontSize: 'clamp(15px, 3.5vw, 17px)',
                   lineHeight: 1.2,
@@ -252,11 +246,13 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap'
                 }}>
-                  {type === 'Book' ? formatBookDisplay(suggestion) : `${suggestion.title} (${suggestion.year})`}
+                  {type === 'Book' ? formatBookDisplay(suggestion)
+                   : type === 'Favorite Song' ? formatSongDisplay(suggestion)
+                   : `${suggestion.title} (${suggestion.year})`}
                 </div>
                 {suggestion.rating && (
-                  <div style={{ 
-                    fontSize: 'clamp(13px, 3vw, 15px)', 
+                  <div style={{
+                    fontSize: 'clamp(13px, 3vw, 15px)',
                     color: '#666',
                     marginTop: '3px',
                     lineHeight: 1
@@ -265,13 +261,23 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
                   </div>
                 )}
                 {type === 'Book' && suggestion.pageCount && (
-                  <div style={{ 
-                    fontSize: 'clamp(11px, 2.5vw, 13px)', 
+                  <div style={{
+                    fontSize: 'clamp(11px, 2.5vw, 13px)',
                     color: '#888',
                     marginTop: '1px',
                     lineHeight: 1
                   }}>
                     📄 {suggestion.pageCount} pages
+                  </div>
+                )}
+                {type === 'Favorite Song' && suggestion.album && (
+                  <div style={{
+                    fontSize: 'clamp(11px, 2.5vw, 13px)',
+                    color: '#888',
+                    marginTop: '1px',
+                    lineHeight: 1
+                  }}>
+                    💿 {suggestion.album}
                   </div>
                 )}
               </div>
