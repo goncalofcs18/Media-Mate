@@ -64,11 +64,22 @@
     flex-shrink: 0;
 }
 
+/* Item icon styling */
 .item-icon {
-    width: clamp(16px, 3.5vw, 20px); /* Normal icon size */
-    height: clamp(16px, 3.5vw, 20px);
-    object-fit: contain;
-    flex-shrink: 0;
+  width: clamp(30px, 6vw, 35px);
+  height: clamp(30px, 6vw, 35px);
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* Larger icon for concert items */
+.item-icon-large {
+  width: clamp(36px, 7vw, 40px);
+  height: clamp(36px, 7vw, 40px);
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .item-content {
@@ -119,27 +130,26 @@
 /* ------------------------- Popup ----------------------- */
 
 
-/* Popup */
-
+/* Popup styling */
 .popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: min(90vw, 400px); /* Responsive width with max limit */
-    height: min(70vh, 500px); /* Responsive height with max limit */
-    background-color: #ece7dd;
-    border: 1px solid #ccc;
-    border-radius: 25px;
-    box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px;
-    padding: clamp(15px, 4vw, 25px);
-    text-align: center;
-    z-index: 100; /* Higher than main-container */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    box-sizing: border-box;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(90vw, 400px); /* Responsive width with max limit */
+  height: min(70vh, 500px); /* Responsive height with max limit */
+  background-color: #ece7dd;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  box-shadow: rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px;
+  padding: clamp(15px, 4vw, 25px);
+  text-align: center;
+  z-index: 100; /* Higher than main-container */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .popup h3 {

@@ -5,6 +5,8 @@ import SearchableInput from './components/SearchableInput';
 function App() {
   const [currentPopup, setCurrentPopup] = useState(null); // Track which popup is open
   const [title, setTitle] = useState(''); // Store the current input value
+  const [venue, setVenue] = useState(''); // Store the venue input value
+  const [concertDate, setConcertDate] = useState(''); // Store the concert date
   const [items, setItems] = useState([]); // Store the list of all items (TV Shows, Movies, etc.)
 
   // Load saved items from localStorage on component mount
@@ -57,12 +59,50 @@ function App() {
       artist: selectedItem.artist || null,
       album: selectedItem.album || null,
       listeners: selectedItem.listeners || null,
-      url: selectedItem.url || null
+      url: selectedItem.url || null,
+      // Concert-specific fields
+      followers: selectedItem.followers || null,
+      popularity: selectedItem.popularity || null,
+      genres: selectedItem.genres || null,
+      spotifyUrl: selectedItem.spotifyUrl || null,
+      // Venue information
+      venue: venue || null,
+      date: concertDate || null
     };
     
     setItems([...items, newItem]);
     setTitle(''); // Clear input
+    setVenue(''); // Clear venue input
+    setConcertDate(''); // Clear date input
     setCurrentPopup(null); // Close popup
+  };
+
+  const handleArtistSelect = (selectedArtist) => {
+    // Set the artist name in the title input without closing popup
+    setTitle(selectedArtist.title || selectedArtist.name);
+  };
+
+  // Function to format date input as dd/mm/yyyy
+  const formatDateInput = (value) => {
+    // Remove all non-numeric characters
+    const numbers = value.replace(/\D/g, '');
+    
+    // Apply formatting based on length
+    if (numbers.length <= 2) {
+      return numbers;
+    } else if (numbers.length <= 4) {
+      return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
+    } else if (numbers.length <= 8) {
+      return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4, 8)}`;
+    } else {
+      // Limit to 8 digits (dd/mm/yyyy)
+      return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4, 8)}`;
+    }
+  };
+
+  const handleDateChange = (e) => {
+    const formatted = formatDateInput(e.target.value);
+    setConcertDate(formatted);
   };
 
   // Function to clear all data (optional - for testing)
@@ -127,21 +167,21 @@ function App() {
                     alt={item.title}
                   />
                 ) : (
-                  <img
-                    src={
-                      item.type === 'TV Show'
-                        ? '/assets/tv2.png'
-                        : item.type === 'Movie'
-                        ? '/assets/movie.png'
+              <img
+                src={
+                  item.type === 'TV Show'
+                    ? '/assets/tv2.png'
+                    : item.type === 'Movie'
+                    ? '/assets/movie.png'
                         : item.type === 'Book'
                         ? '/assets/book.png'
                         : item.type === 'Favorite Song'
                         ? '/assets/music.png'
-                        : '/assets/microphone.png'
-                    }
-                    className="item-icon"
-                    alt={item.type}
-                  />
+                    : '/assets/microphone.png'
+                }
+                    className={item.type === 'Concert' ? 'item-icon-large' : 'item-icon'}
+                alt={item.type}
+              />
                 )}
                 
                 <div className="item-content">
@@ -182,11 +222,30 @@ function App() {
                       💿 {item.album}
                     </div>
                   )}
+                  {item.type === 'Concert' && (item.venue || item.date) && (
+                    <div style={{ 
+                      fontSize: 'clamp(11px, 2.5vw, 13px)', 
+                      color: item.type === 'TV Show' ? '#434c96' : '#fff',
+                      opacity: 0.8,
+                      marginTop: '1px',
+                      lineHeight: 1,
+                      display: 'flex',
+                      gap: '8px',
+                      flexWrap: 'wrap'
+                    }}>
+                      {item.venue && (
+                        <span>🏛️ {item.venue}</span>
+                      )}
+                      {item.date && (
+                        <span>📅 {item.date}</span>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+            </li>
+          ))}
+        </ul>
+      </div>
       )}
 
       {/* MAIN BUTTON */}
@@ -278,31 +337,31 @@ function App() {
             <div style={{ textAlign: 'center', marginBottom: '10px' }}>
               <h3 style={{
                 fontSize: 'clamp(40px, 9vw, 52px)',
-                fontFamily: 'Kare, sans-serif',
-                color: '#f8c04b',
+              fontFamily: 'Kare, sans-serif',
+              color: '#f8c04b',
                 margin: '0',
                 lineHeight: '1.1'
               }}>
-                TV Show
-              </h3>
+            TV Show
+          </h3>
             </div>
             
             {/* Form Content */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '15px' }}>
               <label style={{
-                display: 'block',
-                fontFamily: 'Kare, sans-serif',
-                color: '#434c96',
+              display: 'block',
+              fontFamily: 'Kare, sans-serif',
+              color: '#434c96',
                 fontSize: 'clamp(26px, 6vw, 32px)',
                 marginBottom: '12px',
                 textAlign: 'left'
               }}>
-                Title:
-              </label>
+            Title:
+          </label>
               
               <SearchableInput
                 type="TV Show"
-                value={title}
+              value={title}
                 onChange={setTitle}
                 onSelect={handleApiItemSelect}
               />
@@ -312,7 +371,7 @@ function App() {
             <div style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '20px' }}>
               <button className="close-button" onClick={() => setCurrentPopup('main')}>
                 Back
-              </button>
+            </button>
             </div>
           </div>
         </div>
@@ -332,27 +391,27 @@ function App() {
             <div style={{ textAlign: 'center', marginBottom: '10px' }}>
               <h3 style={{
                 fontSize: 'clamp(40px, 9vw, 52px)',
-                fontFamily: 'Kare, sans-serif',
-                color: '#dd0526',
+              fontFamily: 'Kare, sans-serif',
+              color: '#dd0526',
                 margin: '0',
                 lineHeight: '1.1'
               }}>
-                Movie
-              </h3>
+            Movie
+          </h3>
             </div>
             
             {/* Form Content */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '15px' }}>
               <label style={{
-                display: 'block',
-                fontFamily: 'Kare, sans-serif',
-                color: '#434c96',
+              display: 'block',
+              fontFamily: 'Kare, sans-serif',
+              color: '#434c96',
                 fontSize: 'clamp(26px, 6vw, 32px)',
                 marginBottom: '12px',
                 textAlign: 'left'
               }}>
-                Title:
-              </label>
+            Title:
+          </label>
               
               <SearchableInput
                 type="Movie"
@@ -376,7 +435,7 @@ function App() {
       {currentPopup === 'book' && (
         <div className="popup">
           <div style={{
-            display: 'flex',
+              display: 'flex',
             flexDirection: 'column',
             height: '100%',
             padding: '16px',
@@ -420,7 +479,7 @@ function App() {
             <div style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '20px' }}>
               <button className="close-button" onClick={() => setCurrentPopup('main')}>
                 Back
-              </button>
+            </button>
             </div>
           </div>
         </div>
@@ -473,6 +532,164 @@ function App() {
             {/* Footer */}
             <div style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '20px' }}>
               <button className="close-button" onClick={() => setCurrentPopup('main')}>
+            Back
+          </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONCERT POPUP */}
+      {currentPopup === 'concert' && (
+        <div className="popup">
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            padding: '16px',
+            boxSizing: 'border-box'
+          }}>
+            {/* Header */}
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+              <h3 style={{
+                fontSize: 'clamp(36px, 8vw, 46px)',
+                fontFamily: 'Kare, sans-serif',
+                color: '#8f337e',
+                margin: '0',
+                lineHeight: '1.1'
+              }}>
+                Concert
+              </h3>
+            </div>
+            
+            {/* Form Content */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '12px', gap: '14px' }}>
+              {/* Artist Section */}
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontFamily: 'Kare, sans-serif',
+                  color: '#434c96',
+                  fontSize: 'clamp(22px, 5.5vw, 28px)',
+                  marginBottom: '8px',
+                  textAlign: 'left'
+                }}>
+                  Artist Name:
+                </label>
+                
+                <SearchableInput
+                  type="Concert"
+                  value={title}
+                  onChange={setTitle}
+                  onSelect={handleArtistSelect}
+                  compact={false}
+                />
+              </div>
+
+              {/* Venue Section */}
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontFamily: 'Kare, sans-serif',
+                  color: '#434c96',
+                  fontSize: 'clamp(22px, 5.5vw, 28px)',
+                  marginBottom: '8px',
+                  textAlign: 'left'
+                }}>
+                  Venue:
+                </label>
+                
+                <input
+                  type="text"
+                  placeholder="Enter venue name"
+                  value={venue}
+                  onChange={(e) => setVenue(e.target.value)}
+                  style={{
+                    padding: 'clamp(14px, 3.5vw, 18px)',
+                    borderRadius: '12px',
+                    border: '1px solid #ccc',
+                    fontSize: 'clamp(18px, 4.5vw, 22px)',
+                    backgroundColor: '#ece7dd',
+                    color: '#434c96',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    minHeight: '52px'
+                  }}
+                />
+              </div>
+
+              {/* Date Section */}
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontFamily: 'Kare, sans-serif',
+                  color: '#434c96',
+                  fontSize: 'clamp(22px, 5.5vw, 28px)',
+                  marginBottom: '8px',
+                  textAlign: 'left'
+                }}>
+                  Date:
+                </label>
+                
+                <input
+                  type="text"
+                  placeholder="Enter date (dd/mm/yyyy)"
+                  value={concertDate}
+                  onChange={handleDateChange}
+                  maxLength="10"
+                  style={{
+                    padding: 'clamp(14px, 3.5vw, 18px)',
+                    borderRadius: '12px',
+                    border: '1px solid #ccc',
+                    fontSize: 'clamp(18px, 4.5vw, 22px)',
+                    backgroundColor: '#ece7dd',
+                    color: '#434c96',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    minHeight: '52px'
+                  }}
+                />
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '16px', display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button 
+                className="close-button" 
+                onClick={() => {
+                  if (title.trim() && venue.trim() && concertDate) {
+                    // Create concert item manually
+                    const concertItem = {
+                      id: `concert_custom_${Date.now()}`,
+                      title: title.trim(),
+                      type: 'Concert',
+                      year: null,
+                      poster: null,
+                      rating: null,
+                      overview: null,
+                      artist: title.trim(),
+                      venue: venue.trim(),
+                      date: concertDate
+                    };
+                    setItems([...items, concertItem]);
+                    setTitle('');
+                    setVenue('');
+                    setConcertDate('');
+                    setCurrentPopup(null);
+                  }
+                }}
+                disabled={!title.trim() || !venue.trim() || !concertDate}
+                style={{
+                  backgroundColor: title.trim() && venue.trim() && concertDate ? '#8f337e' : '#ccc',
+                  cursor: title.trim() && venue.trim() && concertDate ? 'pointer' : 'not-allowed'
+                }}
+              >
+                Save Concert
+              </button>
+              <button 
+                className="close-button" 
+                onClick={() => setCurrentPopup('main')}
+              >
                 Back
               </button>
             </div>

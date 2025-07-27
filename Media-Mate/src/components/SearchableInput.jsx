@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { searchMovies, searchTVShows } from '../utils/tmdbApi';
 import { searchBooks } from '../utils/googleBooksApi';
 import { searchTracks } from '../utils/lastfmApi';
+import { searchArtistsSimple as searchArtists } from '../utils/spotifyApi';
 
-const SearchableInput = ({ type, onSelect, value, onChange }) => {
+const SearchableInput = ({ type, onSelect, value, onChange, compact = false }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Make API calls for Movie, TV Show, Book, and Favorite Song types
-    if (type === 'Movie' || type === 'TV Show' || type === 'Book' || type === 'Favorite Song') {
+    // Make API calls for Movie, TV Show, Book, Favorite Song, and Concert types
+    if (type === 'Movie' || type === 'TV Show' || type === 'Book' || type === 'Favorite Song' || type === 'Concert') {
       let searchFunction;
 
       if (type === 'Movie') {
@@ -21,6 +22,8 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
         searchFunction = searchBooks;
       } else if (type === 'Favorite Song') {
         searchFunction = searchTracks;
+      } else if (type === 'Concert') {
+        searchFunction = searchArtists;
       }
 
       // Debounce search to avoid too many API calls
@@ -44,7 +47,7 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
 
       return () => clearTimeout(timeoutId);
     } else {
-      // For other types (Concert, etc.), just show the dropdown if there's text
+      // For other types, just show the dropdown if there's text
       if (value.trim().length > 2) {
         setSuggestions([]);
         setShowSuggestions(true);
@@ -81,8 +84,17 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
       overview: null,
       tmdbId: null,
       // Music-specific fields
-      artist: null,
-      album: null
+      artist: type === 'Concert' ? value.trim() : null,
+      album: null,
+      // Concert-specific fields
+      followers: null,
+      popularity: null,
+      genres: null,
+      // Venue-specific fields
+      name: null,
+      address: null,
+      city: null,
+      country: null
     };
     onSelect(customItem);
     setShowSuggestions(false);
@@ -112,6 +124,10 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
     return displayText;
   };
 
+  const formatArtistDisplay = (artist) => {
+    return artist.title; // Just the artist name
+  };
+
   return (
     <div style={{ position: 'relative', width: '100%' }}>
       <input
@@ -119,17 +135,17 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
         onChange={handleInputChange}
         onBlur={handleInputBlur}
         onFocus={() => value.length > 2 && (suggestions.length > 0 || value.trim().length > 0) && setShowSuggestions(true)}
-        placeholder={`Search for ${type.toLowerCase()}...`}
+        placeholder={`Search for ${type === 'Concert' ? 'artist' : type.toLowerCase()}...`}
         style={{
-          padding: 'clamp(14px, 3.5vw, 18px)',
+          padding: compact ? 'clamp(12px, 3vw, 16px)' : 'clamp(14px, 3.5vw, 18px)',
           borderRadius: '12px',
           border: '1px solid #ccc',
-          fontSize: 'clamp(18px, 4.5vw, 22px)',
+          fontSize: compact ? 'clamp(16px, 4vw, 20px)' : 'clamp(18px, 4.5vw, 22px)',
           backgroundColor: '#ece7dd',
           color: '#434c96',
           width: '100%',
           boxSizing: 'border-box',
-          minHeight: '52px',
+          minHeight: compact ? '45px' : '52px',
         }}
       />
 
@@ -152,14 +168,14 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
           <div
             onClick={handleCustomSave}
             style={{
-              padding: 'clamp(14px, 3.5vw, 18px)',
+              padding: compact ? 'clamp(10px, 2.5vw, 14px)' : 'clamp(14px, 3.5vw, 18px)',
               borderBottom: suggestions.length > 0 ? '2px solid #434c96' : 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: 'clamp(12px, 2.5vw, 16px)',
-              fontSize: 'clamp(16px, 4vw, 18px)',
-              minHeight: '65px',
+              gap: compact ? 'clamp(8px, 2vw, 12px)' : 'clamp(12px, 2.5vw, 16px)',
+              fontSize: compact ? 'clamp(14px, 3.5vw, 16px)' : 'clamp(16px, 4vw, 18px)',
+              minHeight: compact ? '55px' : '65px',
               backgroundColor: '#d4e6f1',
               transition: 'background-color 0.2s ease',
             }}
@@ -204,38 +220,77 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
           </div>
 
           {/* API suggestions */}
-          {(type === 'Movie' || type === 'TV Show' || type === 'Book' || type === 'Favorite Song') && suggestions.map((suggestion, index) => (
+          {(type === 'Movie' || type === 'TV Show' || type === 'Book' || type === 'Favorite Song' || type === 'Concert') && suggestions.map((suggestion, index) => (
             <div
               key={suggestion.id}
               onClick={() => handleSuggestionClick(suggestion)}
               style={{
-                padding: 'clamp(14px, 3.5vw, 18px)',
+                padding: compact ? 'clamp(10px, 2.5vw, 14px)' : 'clamp(14px, 3.5vw, 18px)',
                 borderBottom: index < suggestions.length - 1 ? '1px solid #d0c7b8' : 'none',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 'clamp(12px, 2.5vw, 16px)',
-                fontSize: 'clamp(16px, 4vw, 18px)',
-                minHeight: '65px',
+                gap: compact ? 'clamp(8px, 2vw, 12px)' : 'clamp(12px, 2.5vw, 16px)',
+                fontSize: compact ? 'clamp(14px, 3.5vw, 16px)' : 'clamp(16px, 4vw, 18px)',
+                minHeight: compact ? '55px' : '65px',
                 backgroundColor: '#ece7dd',
                 transition: 'background-color 0.2s ease',
               }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#ddd4c7'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#ece7dd'}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = '#ddd4c7')}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = '#ece7dd')}
             >
-              {suggestion.poster && (
-                <img
-                  src={suggestion.poster}
-                  alt={suggestion.title}
-                  style={{
-                    width: 'clamp(36px, 7vw, 44px)',
-                    height: type === 'Favorite Song' ? 'clamp(36px, 7vw, 44px)' : 'clamp(54px, 10.5vw, 66px)', // Square for songs
-                    objectFit: 'cover',
-                    borderRadius: '4px',
-                    flexShrink: 0,
-                  }}
-                />
-              )}
+              {/* Debug: Always show image area with poster info */}
+              <div style={{
+                width: 'clamp(36px, 7vw, 44px)',
+                height: type === 'Favorite Song' ? 'clamp(36px, 7vw, 44px)' : 'clamp(54px, 10.5vw, 66px)',
+                borderRadius: '4px',
+                flexShrink: 0,
+                backgroundColor: '#8f337e', // Purple background for all
+                border: '1px solid #ddd',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 'clamp(16px, 4vw, 20px)',
+                color: '#fff',
+                overflow: 'hidden',
+                position: 'relative'
+              }}>
+                {suggestion.poster ? (
+                  <img
+                    src={suggestion.poster}
+                    alt={suggestion.title}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: '4px',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      zIndex: 2
+                    }}
+                    onLoad={(e) => {
+                      console.log(`Image loaded and should be visible: ${suggestion.poster}`);
+                      // Ensure the image is visible
+                      e.target.style.opacity = '1';
+                    }}
+                    onError={(e) => {
+                      console.log(`Image failed to load: ${suggestion.poster}`);
+                      // Hide failed image, show letter instead
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                ) : null}
+                {/* Always show letter as fallback */}
+                <div style={{
+                  position: suggestion.poster ? 'absolute' : 'static',
+                  zIndex: 1,
+                  fontSize: 'inherit',
+                  fontWeight: 'bold'
+                }}>
+                  {(suggestion.title || suggestion.name || '').charAt(0).toUpperCase()}
+                </div>
+              </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
                   fontWeight: 'bold',
@@ -248,6 +303,7 @@ const SearchableInput = ({ type, onSelect, value, onChange }) => {
                 }}>
                   {type === 'Book' ? formatBookDisplay(suggestion)
                    : type === 'Favorite Song' ? formatSongDisplay(suggestion)
+                   : type === 'Concert' ? formatArtistDisplay(suggestion)
                    : `${suggestion.title} (${suggestion.year})`}
                 </div>
                 {suggestion.rating && (
