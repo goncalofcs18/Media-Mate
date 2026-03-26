@@ -322,7 +322,7 @@
 
 @font-face {
     font-family: 'Kare';
-    src: url('assets/fonts/Kare.ttf') format('truetype');
+    src: url('/fonts/Kare.ttf') format('truetype');
     /* Adjust the format if it's OTF or WOFF */
     font-weight: normal;
     font-style: normal;

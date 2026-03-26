@@ -117,7 +117,7 @@ function App() {
       {/* LOGO */}
       <div className="image-container">
         <img
-          src="assets/logo.png"
+          src="/images/logo.png"
           alt="Metallic Icon"
           className="metallic-image"
         />
@@ -170,14 +170,14 @@ function App() {
               <img
                 src={
                   item.type === 'TV Show'
-                    ? '/assets/tv2.png'
+                    ? '/images/tv2.png'
                     : item.type === 'Movie'
-                    ? '/assets/movie.png'
+                    ? '/images/movie.png'
                         : item.type === 'Book'
-                        ? '/assets/book.png'
+                        ? '/images/book.png'
                         : item.type === 'Favorite Song'
-                        ? '/assets/music.png'
-                    : '/assets/microphone.png'
+                        ? '/images/music.png'
+                    : '/images/microphone.png'
                 }
                     className={item.type === 'Concert' ? 'item-icon-large' : 'item-icon'}
                 alt={item.type}
@@ -250,7 +250,7 @@ function App() {
 
       {/* MAIN BUTTON */}
       <button className="image-button" onClick={() => setCurrentPopup('main')}>
-        <img src="assets/Media.png" alt="Button Icon" />
+        <img src="/images/Media.png" alt="Button Icon" />
       </button>
 
       {/* MAIN POPUP */}
@@ -273,7 +273,7 @@ function App() {
               style={{ backgroundColor: '#f8c04b', color: '#ece7dd' }}
               onClick={() => setCurrentPopup('tvShow')}
             >
-              <img src="assets/tv.png" alt="TV Show" />
+              <img src="/images/tv.png" alt="TV Show" />
               TV Show
             </button>
             <button
@@ -281,7 +281,7 @@ function App() {
               style={{ backgroundColor: '#dd0526', color: '#ece7dd' }}
               onClick={() => setCurrentPopup('movie')}
             >
-              <img src="assets/movie.png" alt="Movie" />
+              <img src="/images/movie.png" alt="Movie" />
               Movie
             </button>
             <button
@@ -289,7 +289,7 @@ function App() {
               style={{ backgroundColor: '#ed712f', color: '#ece7dd' }}
               onClick={() => setCurrentPopup('book')}
             >
-              <img src="assets/book.png" alt="Book" />
+              <img src="/images/book.png" alt="Book" />
               Book
             </button>
             <button
@@ -297,7 +297,7 @@ function App() {
               style={{ backgroundColor: '#27a470', color: '#ece7dd' }}
               onClick={() => setCurrentPopup('favoriteSong')}
             >
-              <img src="assets/music.png" alt="Music" />
+              <img src="/images/music.png" alt="Music" />
               Song
             </button>
             <button
@@ -305,7 +305,7 @@ function App() {
               style={{ backgroundColor: '#8f337e', color: '#ece7dd' }}
               onClick={() => setCurrentPopup('concert')}
             >
-              <img src="assets/microphone.png" alt="Concert" />
+              <img src="/images/microphone.png" alt="Concert" />
               Concert
             </button>
             <button
@@ -313,7 +313,7 @@ function App() {
               style={{ backgroundColor: '#434c96', color: '#ece7dd' }}
               onClick={() => setCurrentPopup('other')}
             >
-              <img src="assets/ellipsis.png" alt="Other" />
+              <img src="/images/ellipsis.png" alt="Other" />
               Other
             </button>
           </div>
